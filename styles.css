@@ -41,6 +41,8 @@
     --text-input: black;
     --card-text-primary: white;
     --card-text-secondary: rgba(255, 255, 255, 0.8);
+    --input-border: #d1d5db;
+    --input-border-focus: black;
 
     /* Colores fijos para header y footer */
     --bg-header-footer: white;
@@ -53,12 +55,14 @@
     --dot-active-border: var(--primary-lightest);
     --text-primary: var(--primary-lightest);
     --text-secondary: rgb(156, 163, 175);
-    --bg-input: #444;
+    --bg-input: #374151;
     --text-input: white;
     --bg-header-footer: #222;
     --text-header-footer: white;
     --card-text-primary: black;
     --card-text-secondary: rgba(0, 0, 0, 0.8);
+    --input-border: #4b5563;
+    --input-border-focus: white;
 }
 
 body {
@@ -348,15 +352,12 @@ body {
 #city-input {
     background-color: var(--bg-input);
     color: var(--text-input);
-    border-color: var(--primary-light);
+    border: 1px solid var(--input-border);
 }
 
 #city-input:focus {
-    border-color: var(--blue-500);
-}
-
-.dark #city-input {
-    border-color: var(--primary-darker);
+    border-color: var(--input-border-focus);
+    outline: none;
 }
 
 #results-container {
