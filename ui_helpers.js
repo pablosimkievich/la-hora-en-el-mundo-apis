@@ -26,24 +26,32 @@ export const updateClockDisplay = (type) => {
     });
 };
 
-export const addClock = async (cityInfo, displayedCities) => {
-    if (displayedCities.size >= MAX_CITIES) {
+export const addClock = async (cityInfo, displayedCities, isInitialLoad = false) => {
+    // Check max cities first
+    if (clocksContainer.children.length >= MAX_CITIES) {
         showAlert('¡Máximo de 8 relojes alcanzado!');
-        return;
+        return false;
     }
 
     const timeZone = await getTimezone(cityInfo.lat, cityInfo.lon);
     if (!timeZone) {
         console.error('Could not get timezone for the city.');
-        return;
+        return false;
     }
     
-    // Evita duplicados
-    if (displayedCities.has(timeZone)) {
-        console.warn('City already added.');
-        return;
+    // Evita duplicados solo cuando no es carga inicial
+    if (!isInitialLoad) {
+        const normalizedCityName = cityInfo.name.toLowerCase().trim();
+        const existingCities = Array.from(clocksContainer.querySelectorAll('.city-name'))
+            .map(el => el.textContent.toLowerCase().trim());
+        
+        if (existingCities.includes(normalizedCityName)) {
+            showAlert('¡Esta ciudad ya está agregada!');
+            return false;
+        }
     }
 
+    // Create clock card
     const card = document.createElement('div');
     card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center', 'cursor-move');
     card.setAttribute('draggable', 'true');
@@ -116,28 +124,28 @@ export const addClock = async (cityInfo, displayedCities) => {
         const cityToRemove = e.currentTarget.dataset.city;
         const cardToRemove = document.querySelector(`[data-timezone="${cityToRemove}"]`);
         
-        // Detener el intervalo antes de eliminar
-        clearInterval(JSON.parse(localStorage.getItem('clockIntervals'))[cityToRemove]);
-
-        // Eliminar del DOM y del localStorage
         if (cardToRemove) {
-            cardToRemove.remove();
-            
-            const storedIntervals = JSON.parse(localStorage.getItem('clockIntervals'));
+            // Detener el intervalo antes de eliminar
+            const storedIntervals = JSON.parse(localStorage.getItem('clockIntervals') || '{}');
+            clearInterval(storedIntervals[cityToRemove]);
             delete storedIntervals[cityToRemove];
             localStorage.setItem('clockIntervals', JSON.stringify(storedIntervals));
 
             // Eliminar la ciudad del array guardado en localStorage
-            const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]').filter(city => {
-                const cityTimeZone = localStorage.getItem(`cityTimeZone_${city.name}`);
-                return cityTimeZone !== cityToRemove;
-            });
+            const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
+                .filter(city => city.name !== cityName);
             localStorage.setItem('storedCities', JSON.stringify(storedCities));
-        }
 
-        displayedCities.delete(cityToRemove);
-        localStorage.setItem('displayedCities', JSON.stringify(Array.from(displayedCities)));
+            // Eliminar la ciudad del Set y actualizar localStorage
+            displayedCities.delete(cityToRemove);
+            localStorage.setItem('displayedCities', JSON.stringify(Array.from(displayedCities)));
+
+            // Eliminar el card del DOM
+            cardToRemove.remove();
+        }
     });
+
+    return true;
 };
 
 export const renderSearchResults = (results) => {

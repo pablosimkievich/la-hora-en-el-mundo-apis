@@ -319,15 +319,27 @@ body {
 }
 
 #limit-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
     background-color: var(--primary-dark);
     color: var(--primary-lightest);
-    transform: scale(0.95) translate(-50%, 0);
+    padding: 1rem 2rem;
+    border-radius: 8px;
     opacity: 0;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #limit-alert.show {
-    transform: scale(1) translate(-50%, 0);
     opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+.hidden {
+    display: none !important;
 }
 
 .footer {

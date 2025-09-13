@@ -53,13 +53,21 @@ const limitAlert = document.getElementById('limit-alert');
 export const showAlert = (message) => {
     limitAlert.textContent = message;
     limitAlert.classList.remove('hidden');
-    limitAlert.classList.add('show');
+    limitAlert.style.opacity = '1';
+    limitAlert.style.transform = 'scale(1) translate(-50%, 0)';
+    
     setTimeout(() => {
-        limitAlert.classList.remove('show');
+        limitAlert.style.opacity = '0';
+        limitAlert.style.transform = 'scale(0.95) translate(-50%, 0)';
         setTimeout(() => {
             limitAlert.classList.add('hidden');
         }, 300);
     }, 3000);
+};
+
+// Test function - you can call this from the browser console
+window.testAlert = () => {
+    showAlert('This is a test alert!');
 };
 
 const handleSearchInput = async (e) => {
@@ -92,7 +100,7 @@ const handleInitialLoad = async () => {
 
     // Recrear los relojes guardados
     for (const cityInfo of storedCities) {
-        await addClock(cityInfo, displayedCities);
+        await addClock(cityInfo, displayedCities, true); // Añadido parámetro true para indicar carga inicial
     }
 };
 
@@ -100,18 +108,22 @@ document.addEventListener('DOMContentLoaded', handleInitialLoad);
 
 cityInput.addEventListener('input', debounce(handleSearchInput, 300));
 
-resultsContainer.addEventListener('click', (e) => {
+resultsContainer.addEventListener('click', async (e) => {
     const item = e.target.closest('.result-item');
-    if (item && displayedCities.size < MAX_CITIES) {
+    if (item && clocksContainer.children.length < MAX_CITIES) {
         const cityInfo = {
             name: item.dataset.name,
             country: item.dataset.country,
             lat: item.dataset.lat,
             lon: item.dataset.lon
         };
-        addClock(cityInfo, displayedCities);
-        cityInput.value = '';
-        resultsContainer.classList.add('hidden');
+        const added = await addClock(cityInfo, displayedCities);
+        if (added) {
+            cityInput.value = '';
+            resultsContainer.classList.add('hidden');
+        }
+    } else if (item) {
+        showAlert('¡Máximo de 8 relojes alcanzado!');
     }
 });
 
