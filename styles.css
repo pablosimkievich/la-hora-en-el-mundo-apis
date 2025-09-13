@@ -1,0 +1,388 @@
+:root {
+    /* Paleta de colores base */
+    --blue-darkest: rgb(15, 101, 138);
+    --blue-darker: rgb(23, 133, 181);
+    --blue-dark: rgb(33, 165, 222);
+    --blue-medium: rgb(81, 182, 225);
+    --blue-light: rgb(126, 199, 231);
+    --blue-lighter: rgb(171, 217, 237);
+    --blue-lightest: rgb(214, 236, 245);
+
+    --red-darkest: rgb(138, 52, 15);
+    --red-darker: rgb(181, 71, 23);
+    --red-dark: rgb(222, 90, 33);
+    --red-medium: rgb(225, 124, 81);
+    --red-light: rgb(231, 158, 126);
+    --red-lighter: rgb(237, 191, 171);
+    --red-lightest: rgb(245, 223, 214);
+
+    --green-darkest: rgb(15, 138, 58);
+    --green-darker: rgb(23, 181, 78);
+    --green-dark: rgb(33, 222, 99);
+    --green-medium: rgb(81, 225, 131);
+    --green-light: rgb(126, 231, 163);
+    --green-lighter: rgb(171, 237, 194);
+    --green-lightest: rgb(214, 245, 225);
+
+    /* Mapeo de colores del tema claro */
+    --primary-darkest: var(--blue-darkest);
+    --primary-darker: var(--blue-darker);
+    --primary-dark: var(--blue-dark);
+    --primary-color: var(--blue-medium);
+    --primary-light: var(--blue-light);
+    --primary-lighter: var(--blue-lighter);
+    --primary-lightest: var(--blue-lightest);
+    --bg-primary: #f0f0f0;
+    --card-bg: var(--primary-light);
+    --dot-active-border: var(--primary-darker);
+    --text-primary: var(--blue-darkest);
+    --text-secondary: rgb(75, 85, 99);
+    --bg-input: white;
+    --text-input: black;
+    --card-text-primary: white;
+    --card-text-secondary: rgba(255, 255, 255, 0.8);
+
+    /* Colores fijos para header y footer */
+    --bg-header-footer: white;
+    --text-header-footer: black;
+}
+
+:root.dark {
+    /* Mapeo de colores del tema oscuro */
+    --bg-primary: #1a1a1a;
+    --dot-active-border: var(--primary-lightest);
+    --text-primary: var(--primary-lightest);
+    --text-secondary: rgb(156, 163, 175);
+    --bg-input: #444;
+    --text-input: white;
+    --bg-header-footer: #222;
+    --text-header-footer: white;
+    --card-text-primary: black;
+    --card-text-secondary: rgba(0, 0, 0, 0.8);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.header {
+    background-color: var(--bg-header-footer);
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    color: var(--text-header-footer);
+}
+
+.logo {
+    width: 30px;
+    height: 30px;
+}
+
+.clock-icon {
+    transform: rotate(15deg);
+}
+
+#theme-toggle-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background-color: black;
+}
+
+:root.dark #theme-toggle-btn {
+    background-color: white;
+}
+
+.btn-toggle {
+    background-color: var(--primary-lightest);
+    color: var(--primary-darkest);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+}
+
+.btn-toggle:hover {
+    background-color: var(--primary-light);
+}
+
+.btn-toggle.active {
+    background-color: var(--primary-darker);
+    color: var(--primary-lightest);
+}
+
+.btn-add {
+    background-color: var(--primary-color);
+    color: var(--primary-lightest);
+    border-radius: 2px;
+    box-shadow: 6px 6px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add:hover {
+    background-color: var(--primary-dark);
+}
+
+.clock-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    position: relative;
+    height: 300px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+}
+
+.clock-card:hover {
+    transform: scale(1.012);
+    transition: ease 0.3s;
+}
+
+.clock-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--card-text-primary);
+}
+
+.clock-card p {
+    color: var(--card-text-secondary);
+}
+
+.clock-display {
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+}
+
+.clock-display>div {
+    display: none;
+}
+
+.clock-display.digital-view>.digital-wrapper {
+    display: block;
+}
+
+.clock-display.analog-view>.clock-analog {
+    display: block;
+}
+
+.clock-digital {
+    font-size: 2.5rem;
+    font-family: 'Inter', monospace;
+    font-weight: 500;
+    letter-spacing: normal;
+    color: var(--primary-darkest);
+    background-color: var(--primary-lightest);
+    border-radius: 8px;
+    width: 210px;
+    white-space: nowrap;
+    text-align: center;
+    box-shadow: 6px 6px 6px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.digital-wrapper {
+    background-color: var(--primary-lighter);
+    box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.1);
+}
+
+.clock-analog {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: var(--primary-lightest);
+    border: 4px solid var(--primary-light);
+    margin-top: 1rem;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.clock-analog::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-darker);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+.clock-analog .marker {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.clock-analog .marker span {
+    position: absolute;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary-darkest);
+    transform: translateY(-50%);
+    user-select: none;
+}
+
+.clock-analog .marker.three {
+    right: 10%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.clock-analog .marker.six {
+    bottom: 10%;
+}
+
+.clock-analog .marker.nine {
+    left: 10%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform-origin: center bottom;
+    background-color: var(--primary-darkest);
+    border-radius: 5px;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.hand.hour {
+    width: 4px;
+    height: 40px;
+    margin-left: -2px;
+    background-color: var(--primary-dark);
+    z-index: 3;
+}
+
+.hand.minute {
+    width: 3px;
+    height: 55px;
+    margin-left: -1.5px;
+    background-color: var(--primary-dark);
+    z-index: 2;
+}
+
+.hand.second {
+    width: 1px;
+    height: 60px;
+    margin-left: -0.5px;
+    background-color: var(--red-medium);
+    z-index: 1;
+}
+
+.dot-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-grow: 1;
+    margin-left: -90px;
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.dot.active {
+    border: 2px solid var(--dot-active-border);
+}
+
+.clock-card.dragging {
+    opacity: 0.6;
+    border: 2px groove var(--primary-darker);
+    transform: scale(1);
+}
+
+#limit-alert {
+    background-color: var(--primary-dark);
+    color: var(--primary-lightest);
+    transform: scale(0.95) translate(-50%, 0);
+    opacity: 0;
+}
+
+#limit-alert.show {
+    transform: scale(1) translate(-50%, 0);
+    opacity: 1;
+}
+
+.footer {
+    margin-top: auto;
+    background-color: var(--bg-header-footer);
+    color: var(--primary-color);
+    padding: 1.5rem 0;
+    text-align: center;
+}
+
+#results-container .result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--primary-lightest);
+}
+
+#results-container .result-item:hover {
+    background-color: var(--primary-lighter);
+}
+
+/* Estilos para el input de búsqueda */
+#city-input {
+    background-color: var(--bg-input);
+    color: var(--text-input);
+    border-color: var(--primary-light);
+}
+
+#city-input:focus {
+    border-color: var(--blue-500);
+}
+
+.dark #city-input {
+    border-color: var(--primary-darker);
+}
+
+#results-container {
+    background-color: var(--bg-input);
+    color: var(--text-input);
+    border-color: var(--primary-light);
+}
+
+.dark #results-container {
+    border-color: var(--primary-darker);
+}
+
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .header>* {
+        flex-basis: 100%;
+    }
+
+    .dot-container {
+        margin-left: 20px;
+    }
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Hora en el Mundo</title>
+    <link rel="icon" type="image/png" href="./favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body class="font-inter">
+
+    <header class="header shadow-lg">
+        <div class="flex items-center space-x-2 mb-4 md:mb-0">
+            <svg class="logo clock-icon text-primary-darker dark:text-primary-lighter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="5" fill="none"
+                    class="text-primary-darkest dark:text-primary-lightest" />
+                <line x1="50" y1="50" x2="50" y2="25" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                    class="hour-hand text-primary-dark dark:text-primary-lighter" />
+                <line x1="50" y1="50" x2="50" y2="15" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                    class="minute-hand text-primary-dark dark:text-primary-lighter" />
+            </svg>
+            <h1 class="text-2xl font-bold text-primary-darker dark:text-primary-lighter whitespace-nowrap">La Hora en el Mundo</h1>
+        </div>
+
+        <div class="dot-container">
+            <div class="dot" id="blue-dot" style="background-color: var(--blue-medium);"></div>
+            <div class="dot" id="red-dot" style="background-color: var(--red-medium);"></div>
+            <div class="dot" id="green-dot" style="background-color: var(--green-medium);"></div>
+        </div>
+        
+        <div class="flex items-center space-x-4 mt-4 md:mt-0">
+            <button id="theme-toggle-btn" class="btn-toggle text-sm font-medium"></button>
+            <div class="flex items-center space-x-2 button-group">
+                <button id="analog-btn" class="btn-toggle text-sm font-medium">Analógico</button>
+                <button id="digital-btn" class="btn-toggle text-sm font-medium">Digital</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 md:p-8">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+            <div class="relative w-full md:w-auto flex-grow">
+                <input type="text" id="city-input" placeholder="Buscar una ciudad..."
+                    class="w-full p-3 border border-primary-light dark:border-primary-darker rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-700">
+                <div id="results-container" class="absolute z-10 w-full mt-2 bg-gray-50 dark:bg-gray-700 border border-primary-light dark:border-primary-darker rounded-lg shadow-lg max-h-60 overflow-y-auto hidden">
+                </div>
+            </div>
+        </div>
+
+        <div id="clocks-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            </div>
+    </main>
+
+    <div id="limit-alert"
+        class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-50 p-3 rounded-lg shadow-lg text-sm font-medium transition-all duration-300">
+        ¡Máximo de 8 relojes alcanzado!
+    </div>
+
+    <footer class="footer">
+        <p class="text-xs">&copy; 2025 La Hora en el Mundo - Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="./utils.js" type="module"></script>
+    <script src="./api_services.js" type="module"></script>
+    <script src="./ui_helpers.js" type="module"></script>
+    <script src="./main.js" type="module"></script>
+</body>
+
+</html>
