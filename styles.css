@@ -77,9 +77,11 @@ body {
     -ms-overflow-style: none;  /* Internet Explorer y Edge */
 }
 
+/*
 html::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari y Opera */
+    display: none;  /* Chrome, Safari y Opera 
 }
+*/
 
 .header {
     background-color: var(--bg-header-footer);
@@ -147,7 +149,7 @@ html::-webkit-scrollbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     position: relative;
-    height: 300px;
+    height: 290px;
     box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
 }
 
