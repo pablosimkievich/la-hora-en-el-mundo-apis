@@ -32,15 +32,23 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     const timeZone = await getTimezone(cityInfo.lat, cityInfo.lon);
     if (!timeZone) return false;
 
+    // Normalizamos para comparaciones de duplicados
     const normalizedName = cityInfo.name.toLowerCase().trim();
-    const existingCities = Array.from(clocksContainer.querySelectorAll('.city-name'))
-        .map(el => el.textContent.toLowerCase().trim());
-    if (!isInitialLoad && existingCities.includes(normalizedName)) {
+    const normalizedLat = Number(cityInfo.lat);
+
+    const existingCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
+    if (!isInitialLoad && existingCities.some(c => 
+        c.name.toLowerCase().trim() === normalizedName && Number(c.lat) === normalizedLat
+    )) {
         showAlert('¡Esta ciudad ya está agregada!');
         resultsContainer.classList.add('hidden');
         return false;
     }
 
+    // Nombre para mostrar solo hasta la primera coma
+    const displayName = cityInfo.name.split(',')[0];
+
+    // Crear tarjeta del reloj
     const card = document.createElement('div');
     card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center');
     card.setAttribute('draggable', 'true');
@@ -50,10 +58,10 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     card.innerHTML = `
         <div class="flex justify-between items-start w-full mb-4">
             <div class="text-left">
-                <h3 class="city-name">${cityInfo.name}</h3>
+                <h3 class="city-name">${displayName}</h3>
                 <p class="text-sm">${cityInfo.country}</p>
             </div>
-            <button class="remove-btn  hover:text-red-dark">
+            <button class="remove-btn hover:text-red-dark">
                 &times;
             </button>
         </div>
@@ -92,27 +100,26 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     updateClock();
     setInterval(updateClock, 1000);
 
+    // Guardar en localStorage solo si no es carga inicial
     if (!isInitialLoad) {
         const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
-        if (!storedCities.some(c => c.name.toLowerCase().trim() === normalizedName)) {
-            storedCities.push(cityInfo);
-            localStorage.setItem('storedCities', JSON.stringify(storedCities));
-        }
+        storedCities.push(cityInfo);
+        localStorage.setItem('storedCities', JSON.stringify(storedCities));
     }
 
+    // Botón de remover
     card.querySelector('.remove-btn').addEventListener('click', () => {
         card.remove();
         displayedCities.delete(timeZone);
 
-        // Eliminar solo esta ciudad de storedCities
         const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
-            .filter(c => c.name.toLowerCase() !== normalizedName);
+            .filter(c => !(c.name.toLowerCase().trim() === normalizedName && Number(c.lat) === normalizedLat));
         localStorage.setItem('storedCities', JSON.stringify(storedCities));
     });
 
-
     return true;
 };
+
 
 export const renderSearchResults = (results) => {
     resultsContainer.innerHTML = '';
