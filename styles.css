@@ -449,7 +449,7 @@ html::-webkit-scrollbar {
 
 /* Estilos para el input de búsqueda */
 #city-input {
-    background-color: var(--bg-input);
+    background-color: #ffffff; 
     color: var(--text-input);
     border: 1px solid var(--input-border);
 }
