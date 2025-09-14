@@ -53,7 +53,7 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
                 <h3 class="city-name">${cityInfo.name}</h3>
                 <p class="text-sm">${cityInfo.country}</p>
             </div>
-            <button class="remove-btn text-gray-500 hover:text-red-dark">
+            <button class="remove-btn">
                 &times;
             </button>
         </div>
