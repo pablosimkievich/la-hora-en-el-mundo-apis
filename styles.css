@@ -72,6 +72,12 @@ body {
     min-height: 100vh;
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer y Edge */
+}
+
+html::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari y Opera */
 }
 
 .header {
@@ -318,6 +324,7 @@ body {
     opacity: 0.6;
     border: 2px groove var(--primary-darker);
     transform: scale(1);
+    cursor: move; /* Añadir cursor solo durante el arrastre */
 }
 
 #limit-alert {

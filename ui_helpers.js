@@ -60,7 +60,7 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
 
     // Crear tarjeta del reloj
     const card = document.createElement('div');
-    card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center', 'cursor-move');
+    card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center');
     card.setAttribute('draggable', 'true');
     card.dataset.timezone = timeZone;
 
