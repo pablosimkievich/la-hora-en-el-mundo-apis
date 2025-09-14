@@ -59,10 +59,11 @@
     --text-input: white;
     --bg-header-footer: #222;
     --text-header-footer: white;
-    --card-text-primary: black;
-    --card-text-secondary: rgba(0, 0, 0, 0.8);
+    --card-text-primary: var(--primary-lightest);
+    --card-text-secondary: var(--primary-lighter);
     --input-border: #4b5563;
     --input-border-focus: white;
+    --card-bg: var(--primary-darkest);
 }
 
 body {
@@ -191,7 +192,7 @@ html::-webkit-scrollbar {
     font-weight: 500;
     letter-spacing: normal;
     color: var(--primary-darkest);
-    background-color: var(--primary-lightest);
+    background-color: var(--primary-lightest); /* Tema claro por defecto */
     border-radius: 8px;
     width: 210px;
     white-space: nowrap;
@@ -204,7 +205,7 @@ html::-webkit-scrollbar {
 }
 
 .digital-wrapper {
-    background-color: var(--primary-lighter);
+    background-color: var(--primary-lighter); /* Tema claro por defecto */
     box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -213,10 +214,25 @@ html::-webkit-scrollbar {
     width: 150px;
     height: 150px;
     border-radius: 50%;
-    background-color: var(--primary-lightest);
-    border: 4px solid var(--primary-light);
+    background-color: var(--primary-lightest); /* Tema claro por defecto */
+    border: 4px solid var(--primary-light); /* Tema claro por defecto */
     margin-top: 1rem;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Aplicar colores oscuros solo en tema oscuro */
+:root.dark .clock-digital {
+    color: var(--card-text-primary);
+    background-color: var(--primary-darker);
+}
+
+:root.dark .digital-wrapper {
+    background-color: var(--primary-dark);
+}
+
+:root.dark .clock-analog {
+    background-color: var(--primary-darker);
+    border-color: var(--primary-dark);
 }
 
 .clock-analog::before {
