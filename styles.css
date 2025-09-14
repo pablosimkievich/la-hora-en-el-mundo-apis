@@ -244,7 +244,7 @@ html::-webkit-scrollbar {
     left: 50%;
     width: 8px;
     height: 8px;
-    background-color: var(--primary-darker);
+    background-color: var(--primary-darkest);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     z-index: 10;
