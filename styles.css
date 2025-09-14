@@ -32,7 +32,7 @@
     --primary-light: var(--blue-light);
     --primary-lighter: var(--blue-lighter);
     --primary-lightest: var(--blue-lightest);
-    --bg-primary: #f5f5f5; /* Cambiado a un gris más neutro */
+    --bg-primary: #f0f0f0;
     --card-bg: var(--primary-light);
     --dot-active-border: var(--primary-darker);
     --text-primary: var(--blue-darkest);
@@ -51,13 +51,13 @@
 
 :root.dark {
     /* Mapeo de colores del tema oscuro */
-    --bg-primary: #111111; /* Cambiado a un negro más puro */
+    --bg-primary: #1a1a1a;
     --dot-active-border: var(--primary-lightest);
     --text-primary: var(--primary-lightest);
     --text-secondary: rgb(156, 163, 175);
     --bg-input: #374151;
     --text-input: white;
-    --bg-header-footer: #1a1a1a; /* Header más oscuro */
+    --bg-header-footer: #222;
     --text-header-footer: white;
     --card-text-primary: var(--primary-lightest);
     --card-text-secondary: var(--primary-lighter);
@@ -391,17 +391,11 @@ html::-webkit-scrollbar {
     background-color: var(--bg-input);
     color: var(--text-input);
     border: 1px solid var(--input-border);
-    transition: all 0.3s ease;
 }
 
 #city-input:focus {
     border-color: var(--input-border-focus);
     outline: none;
-    background-color: rgba(0, 0, 0, 0.05); /* Un gris claro semi-transparente para ambos temas */
-}
-
-:root.dark #city-input:focus {
-    background-color: rgba(255, 255, 255, 0.05); /* Un gris claro semi-transparente para tema oscuro */
 }
 
 #results-container {
