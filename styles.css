@@ -495,4 +495,35 @@ html::-webkit-scrollbar {
     .dot-container {
         margin-left: 20px;
     }
+    
+    /* Contenedor de tarjetas centrado */
+    .clocks-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* centra vertical */
+        align-items: center;     /* centra horizontal */
+        gap: 1.5rem;
+        width: 100%;
+        min-height: calc(100vh - 140px); /* ajustar según header + footer */
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+
+    .clock-card {
+        
+        width: 100%;
+        max-width: 450px;
+        margin: auto; /* fuerza centrado */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .clock-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+    }
 }
