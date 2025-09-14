@@ -22,6 +22,8 @@ export const updateClockDisplay = (type) => {
 };
 
 export const addClock = async (cityInfo, displayedCities, isInitialLoad = false) => {
+    const MAX_CITIES = 8;
+
     if (clocksContainer.children.length >= MAX_CITIES && !isInitialLoad) {
         showAlert('¡Máximo de 8 relojes alcanzado!');
         resultsContainer.classList.add('hidden');
@@ -32,38 +34,35 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     const timeZone = await getTimezone(cityInfo.lat, cityInfo.lon);
     if (!timeZone) return false;
 
-    // Normalizamos para comparaciones de duplicados
-    const normalizedName = cityInfo.name.toLowerCase().trim();
-    const normalizedLat = Number(cityInfo.lat);
+    // Normalizar nombre (solo hasta la coma) y país
+    const normalizedName = cityInfo.name.split(',')[0].toLowerCase().trim();
+    const normalizedCountry = cityInfo.country.toLowerCase().trim();
 
-    const existingCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
-    if (!isInitialLoad && existingCities.some(c => 
-        c.name.toLowerCase().trim() === normalizedName && Number(c.lat) === normalizedLat
+    // Revisar duplicados en storedCities
+    const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
+    if (!isInitialLoad && storedCities.some(c =>
+        c.name.split(',')[0].toLowerCase().trim() === normalizedName &&
+        c.country.toLowerCase().trim() === normalizedCountry
     )) {
         showAlert('¡Esta ciudad ya está agregada!');
         resultsContainer.classList.add('hidden');
         return false;
     }
 
-    // Nombre para mostrar solo hasta la primera coma
-    const displayName = cityInfo.name.split(',')[0];
-
     // Crear tarjeta del reloj
     const card = document.createElement('div');
     card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center');
     card.setAttribute('draggable', 'true');
-    card.dataset.lat = cityInfo.lat;
-    card.dataset.lon = cityInfo.lon;
+
+    const cityDisplayName = cityInfo.name.split(',')[0];
 
     card.innerHTML = `
         <div class="flex justify-between items-start w-full mb-4">
             <div class="text-left">
-                <h3 class="city-name">${displayName}</h3>
+                <h3 class="city-name">${cityDisplayName}</h3>
                 <p class="text-sm">${cityInfo.country}</p>
             </div>
-            <button class="remove-btn hover:text-red-dark">
-                &times;
-            </button>
+            <button class="remove-btn hover:text-red-dark">&times;</button>
         </div>
         <div class="clock-display flex items-center justify-center w-full">
             <div class="digital-wrapper bg-primary-lightest p-3 rounded-xl shadow">
@@ -76,12 +75,14 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
             </div>
         </div>
     `;
+
     clocksContainer.appendChild(card);
     displayedCities.add(timeZone);
 
     const clockDisplay = card.querySelector('.clock-display');
-    clockDisplay.classList.toggle('digital-view', localStorage.getItem('clockType') === 'digital');
-    clockDisplay.classList.toggle('analog-view', localStorage.getItem('clockType') === 'analog');
+    const clockType = localStorage.getItem('clockType');
+    clockDisplay.classList.toggle('digital-view', clockType === 'digital');
+    clockDisplay.classList.toggle('analog-view', clockType === 'analog');
 
     const updateClock = () => {
         const date = new Date();
@@ -90,6 +91,7 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
         });
         const [h, m, s] = formatter.format(date).split(':').map(Number);
         card.querySelector('.clock-digital').textContent = formatter.format(date);
+
         const hourHand = card.querySelector('.hand.hour');
         const minuteHand = card.querySelector('.hand.minute');
         const secondHand = card.querySelector('.hand.second');
@@ -97,28 +99,32 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
         if (minuteHand) minuteHand.style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
         if (secondHand) secondHand.style.transform = `rotate(${s * 6}deg)`;
     };
-    updateClock();
-    setInterval(updateClock, 1000);
 
-    // Guardar en localStorage solo si no es carga inicial
+    updateClock();
+    const intervalId = setInterval(updateClock, 1000);
+
+    // Guardar en localStorage si no es carga inicial
     if (!isInitialLoad) {
-        const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
         storedCities.push(cityInfo);
         localStorage.setItem('storedCities', JSON.stringify(storedCities));
     }
 
-    // Botón de remover
+    // Botón de eliminar
     card.querySelector('.remove-btn').addEventListener('click', () => {
         card.remove();
         displayedCities.delete(timeZone);
 
-        const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
-            .filter(c => !(c.name.toLowerCase().trim() === normalizedName && Number(c.lat) === normalizedLat));
-        localStorage.setItem('storedCities', JSON.stringify(storedCities));
+        const updatedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
+            .filter(c => !(c.name.split(',')[0].toLowerCase().trim() === normalizedName &&
+                           c.country.toLowerCase().trim() === normalizedCountry));
+        localStorage.setItem('storedCities', JSON.stringify(updatedCities));
+
+        clearInterval(intervalId);
     });
 
     return true;
 };
+
 
 
 export const renderSearchResults = (results) => {
