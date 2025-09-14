@@ -1,3 +1,9 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 :root {
     /* Paleta de colores base */
     --blue-darkest: rgb(15, 101, 138);
@@ -146,24 +152,27 @@ html::-webkit-scrollbar {
 }
 
 .clocks-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem; /* espacio entre tarjetas */
     justify-content: center; /* centra la grilla si sobra espacio */
 }
 
-
 .clock-card {
     background-color: var(--card-bg);
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
     position: relative;
     height: 290px;
     flex: 0 0 auto; /* evita que se estiren */
     width: 350px; /* ancho fijo */
     max-width: 100%; /* para que no se salga del contenedor en móvil */
-    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* evita que el contenido sobresalga */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .clock-card:hover {
@@ -181,13 +190,39 @@ html::-webkit-scrollbar {
     color: var(--card-text-secondary);
 }
 
+.clocks-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem; /* espacio entre tarjetas */
+    justify-content: center; /* centra la grilla si sobra espacio */
+}
+
+.clock-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    position: relative;
+    height: 290px;
+    flex: 0 0 auto; /* evita que se estiren */
+    width: 350px; /* ancho fijo */
+    max-width: 100%; /* para que no se salga del contenedor en móvil */
+    overflow: hidden; /* evita que el contenido sobresalga */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .clock-display {
     min-height: 160px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
+    align-items: center;   /* centrado vertical */
+    justify-content: center; /* centrado horizontal */
+    padding: 0;            /* quitar padding extra que empuja */
+    box-sizing: border-box; /* incluir bordes y padding */
 }
+
 
 .clock-display>div {
     display: none;
@@ -208,16 +243,20 @@ html::-webkit-scrollbar {
     letter-spacing: normal;
     color: var(--primary-darkest);
     background-color: var(--primary-lightest);
-    /* Tema claro por defecto */
     border-radius: 8px;
-    width: 210px;
+    width: 100%; /* ajustar al ancho de la card */
+    max-width: 100%;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-align: center;
     box-shadow: 6px 6px 6px rgba(0, 0, 0, 0.1);
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    align-items: center;
+    justify-content: center;
 }
 
 .digital-wrapper {
