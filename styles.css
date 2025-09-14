@@ -414,6 +414,9 @@ html::-webkit-scrollbar {
     border-color: var(--primary-darker);
 }
 
+.remove-btn {
+    color: white;
+}
 
 @media (max-width: 768px) {
     .header {
