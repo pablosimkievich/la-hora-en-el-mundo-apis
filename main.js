@@ -80,7 +80,7 @@ const handleInitialLoad = async () => {
     displayedCities.clear();
     clocksContainer.innerHTML = '';
 
-    const savedClockType = localStorage.getItem('clockType');
+    const savedClockType = localStorage.getItem('clockType') || 'analog';
     const savedPalette = localStorage.getItem('colorPalette') || 'blue';
     const savedTheme = localStorage.getItem('theme') || 'light';
     const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
