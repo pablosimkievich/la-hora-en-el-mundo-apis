@@ -1,4 +1,4 @@
-// Funciones auxiliares de interfaz de usuario
+// ui_helpers.js
 import { getTimezone } from "./api_services.js";
 import { showAlert } from "./main.js";
 
@@ -10,73 +10,51 @@ export const updateClockDisplay = (type) => {
     localStorage.setItem('clockType', type);
     const analogBtn = document.getElementById('analog-btn');
     const digitalBtn = document.getElementById('digital-btn');
-
-    // Reiniciar ambos botones y activar el correcto
     analogBtn.classList.remove('active');
     digitalBtn.classList.remove('active');
-    if (type === 'digital') {
-        digitalBtn.classList.add('active');
-    } else {
-        analogBtn.classList.add('active');
-    }
+    if (type === 'digital') digitalBtn.classList.add('active');
+    else analogBtn.classList.add('active');
 
     document.querySelectorAll('.clock-display').forEach(display => {
-        if (type === 'digital') {
-            display.classList.add('digital-view');
-            display.classList.remove('analog-view');
-        } else {
-            display.classList.add('analog-view');
-            display.classList.remove('digital-view');
-        }
+        display.classList.toggle('digital-view', type === 'digital');
+        display.classList.toggle('analog-view', type === 'analog');
     });
 };
 
 export const addClock = async (cityInfo, displayedCities, isInitialLoad = false) => {
-    // Verificar primero el máximo de ciudades
-    if (clocksContainer.children.length >= MAX_CITIES) {
-        if (!isInitialLoad) {
-            showAlert('¡Máximo de 8 relojes alcanzado!');
-            resultsContainer.classList.add('hidden');
-        }
+    if (clocksContainer.children.length >= MAX_CITIES && !isInitialLoad) {
+        showAlert('¡Máximo de 8 relojes alcanzado!');
+        resultsContainer.classList.add('hidden');
         return false;
     }
+    if (!cityInfo.lat || !cityInfo.lon) return false;
 
     const timeZone = await getTimezone(cityInfo.lat, cityInfo.lon);
-    if (!timeZone) {
-        console.error('No se pudo obtener la zona horaria para esta ciudad');
-        return false;
-    }
+    if (!timeZone) return false;
 
-    // Evitar duplicados usando el nombre de la ciudad
-    const normalizedCityName = cityInfo.name.toLowerCase().trim();
+    const normalizedName = cityInfo.name.toLowerCase().trim();
     const existingCities = Array.from(clocksContainer.querySelectorAll('.city-name'))
         .map(el => el.textContent.toLowerCase().trim());
-    
-    if (!isInitialLoad && existingCities.includes(normalizedCityName)) {
+    if (!isInitialLoad && existingCities.includes(normalizedName)) {
         showAlert('¡Esta ciudad ya está agregada!');
         resultsContainer.classList.add('hidden');
         return false;
     }
 
-    // Crear tarjeta del reloj
     const card = document.createElement('div');
     card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center');
     card.setAttribute('draggable', 'true');
-    card.dataset.timezone = timeZone;
-
-    const cityName = cityInfo.name.split(',')[0];
-    const countryName = cityInfo.country;
+    card.dataset.lat = cityInfo.lat;
+    card.dataset.lon = cityInfo.lon;
 
     card.innerHTML = `
         <div class="flex justify-between items-start w-full mb-4">
             <div class="text-left">
-                <h3 class="city-name">${cityName}</h3>
-                <p class="text-sm">${countryName}</p>
+                <h3 class="city-name">${cityInfo.name}</h3>
+                <p class="text-sm">${cityInfo.country}</p>
             </div>
-            <button class="remove-btn text-gray-500 hover:text-red-dark" data-city="${timeZone}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
+            <button class="remove-btn text-gray-500 hover:text-red-dark">
+                &times;
             </button>
         </div>
         <div class="clock-display flex items-center justify-center w-full">
@@ -94,105 +72,60 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     displayedCities.add(timeZone);
 
     const clockDisplay = card.querySelector('.clock-display');
-    const clockType = localStorage.getItem('clockType');
-    if (clockType === 'digital') {
-        clockDisplay.classList.add('digital-view');
-    } else {
-        clockDisplay.classList.add('analog-view');
-    }
+    clockDisplay.classList.toggle('digital-view', localStorage.getItem('clockType') === 'digital');
+    clockDisplay.classList.toggle('analog-view', localStorage.getItem('clockType') === 'analog');
 
-    const timeUpdater = () => {
+    const updateClock = () => {
         const date = new Date();
         const formatter = new Intl.DateTimeFormat('es-AR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-            timeZone: timeZone
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone
         });
-        const formattedTime = formatter.format(date);
-        const [hours, minutes, seconds] = formattedTime.split(':').map(Number);
-        updateDigitalClock(card.querySelector('.clock-digital'), formattedTime);
-        updateAnalogClock(card.querySelector('.clock-analog'), hours, minutes, seconds);
+        const [h, m, s] = formatter.format(date).split(':').map(Number);
+        card.querySelector('.clock-digital').textContent = formatter.format(date);
+        const hourHand = card.querySelector('.hand.hour');
+        const minuteHand = card.querySelector('.hand.minute');
+        const secondHand = card.querySelector('.hand.second');
+        if (hourHand) hourHand.style.transform = `rotate(${(h % 12) * 30 + m * 0.5}deg)`;
+        if (minuteHand) minuteHand.style.transform = `rotate(${m * 6 + s * 0.1}deg)`;
+        if (secondHand) secondHand.style.transform = `rotate(${s * 6}deg)`;
     };
+    updateClock();
+    setInterval(updateClock, 1000);
 
-    timeUpdater();
-    const clockIntervals = JSON.parse(localStorage.getItem('clockIntervals') || '{}');
-    clockIntervals[timeZone] = setInterval(timeUpdater, 1000);
-    localStorage.setItem('clockIntervals', JSON.stringify(clockIntervals));
-
-    // Actualizar el almacenamiento local solo si no es carga inicial
     if (!isInitialLoad) {
         const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
-        if (!storedCities.some(city => city.name.toLowerCase().trim() === normalizedCityName)) {
+        if (!storedCities.some(c => c.name.toLowerCase().trim() === normalizedName)) {
             storedCities.push(cityInfo);
             localStorage.setItem('storedCities', JSON.stringify(storedCities));
         }
     }
 
-    card.querySelector('.remove-btn').addEventListener('click', (e) => {
-        const cityToRemove = e.currentTarget.dataset.city;
-        const cardToRemove = document.querySelector(`[data-timezone="${cityToRemove}"]`);
-        
-        if (cardToRemove) {
-            // Detener el intervalo antes de eliminar
-            const storedIntervals = JSON.parse(localStorage.getItem('clockIntervals') || '{}');
-            clearInterval(storedIntervals[cityToRemove]);
-            delete storedIntervals[cityToRemove];
-            localStorage.setItem('clockIntervals', JSON.stringify(storedIntervals));
+    card.querySelector('.remove-btn').addEventListener('click', () => {
+        card.remove();
+        displayedCities.delete(timeZone);
 
-            // Eliminar la ciudad del almacenamiento local
-            const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
-                .filter(city => city.name !== cityName);
-            localStorage.setItem('storedCities', JSON.stringify(storedCities));
-
-            // Eliminar la ciudad del Set y actualizar el almacenamiento
-            displayedCities.delete(cityToRemove);
-            localStorage.setItem('displayedCities', JSON.stringify(Array.from(displayedCities)));
-
-            // Eliminar la tarjeta del DOM
-            cardToRemove.remove();
-        }
+        // Eliminar solo esta ciudad de storedCities
+        const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
+            .filter(c => c.name.toLowerCase() !== normalizedName);
+        localStorage.setItem('storedCities', JSON.stringify(storedCities));
     });
+
 
     return true;
 };
 
 export const renderSearchResults = (results) => {
     resultsContainer.innerHTML = '';
-    if (results.length > 0) {
-        resultsContainer.classList.remove('hidden');
-        results.forEach(city => {
-            const item = document.createElement('div');
-            item.classList.add('result-item', 'p-2', 'cursor-pointer');
-            item.innerHTML = `
-                <span>${city.name}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">(${city.country})</span>
-            `;
-            item.dataset.lat = city.lat;
-            item.dataset.lon = city.lon;
-            item.dataset.name = city.name;
-            item.dataset.country = city.country;
-            resultsContainer.appendChild(item);
-        });
-    } else {
-        resultsContainer.classList.add('hidden');
-    }
-};
-
-const updateDigitalClock = (element, timeString) => {
-    element.textContent = timeString;
-};
-
-const updateAnalogClock = (element, hours, minutes, seconds) => {
-    const secondHand = element.querySelector('.hand.second');
-    const minuteHand = element.querySelector('.hand.minute');
-    const hourHand = element.querySelector('.hand.hour');
-    const displayHours = hours > 12 ? hours - 12 : hours;
-    const secondDeg = seconds * 6;
-    const minuteDeg = minutes * 6 + seconds * 0.1;
-    const hourDeg = (displayHours * 30) + (minutes * 0.5);
-    if (secondHand) secondHand.style.transform = `rotate(${secondDeg}deg)`;
-    if (minuteHand) minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
-    if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
+    if (!results.length) return resultsContainer.classList.add('hidden');
+    resultsContainer.classList.remove('hidden');
+    results.forEach(city => {
+        const item = document.createElement('div');
+        item.classList.add('result-item', 'p-2', 'cursor-pointer');
+        item.dataset.name = city.name;
+        item.dataset.country = city.country;
+        item.dataset.lat = city.lat;
+        item.dataset.lon = city.lon;
+        item.innerHTML = `<span>${city.name}</span><span class="text-xs text-gray-500 ml-2">(${city.country})</span>`;
+        resultsContainer.appendChild(item);
+    });
 };

@@ -1,9 +1,8 @@
 // main.js
 import { debounce } from './utils.js';
-import { searchCities, getTimezone } from './api_services.js';
+import { searchCities } from './api_services.js';
 import { renderSearchResults, addClock, updateClockDisplay } from './ui_helpers.js';
 
-// Constantes y estado
 const MAX_CITIES = 8;
 let displayedCities = new Set();
 const analogBtn = document.getElementById('analog-btn');
@@ -13,9 +12,8 @@ const resultsContainer = document.getElementById('results-container');
 const clocksContainer = document.getElementById('clocks-container');
 const root = document.documentElement;
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
-let clockIntervals = {};
 
-// Paletas de colores disponibles
+// Paletas de colores
 const palettes = {
     blue: ['--blue-darkest', '--blue-darker', '--blue-dark', '--blue-medium', '--blue-light', '--blue-lighter', '--blue-lightest'],
     red: ['--red-darkest', '--red-darker', '--red-dark', '--red-medium', '--red-light', '--red-lighter', '--red-lightest'],
@@ -24,7 +22,7 @@ const palettes = {
 
 const setColorPalette = (paletteName) => {
     const palette = palettes[paletteName];
-    const primaryMapping = {
+    const mapping = {
         '--primary-darkest': palette[0],
         '--primary-darker': palette[1],
         '--primary-dark': palette[2],
@@ -33,9 +31,8 @@ const setColorPalette = (paletteName) => {
         '--primary-lighter': palette[5],
         '--primary-lightest': palette[6]
     };
-
-    for (const [primaryVar, colorVar] of Object.entries(primaryMapping)) {
-        root.style.setProperty(primaryVar, `var(${colorVar})`);
+    for (const [varName, colorVar] of Object.entries(mapping)) {
+        root.style.setProperty(varName, `var(${colorVar})`);
     }
     document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
     document.getElementById(`${paletteName}-dot`).classList.add('active');
@@ -49,25 +46,16 @@ const toggleTheme = () => {
 };
 
 const limitAlert = document.getElementById('limit-alert');
-
 export const showAlert = (message) => {
     limitAlert.textContent = message;
     limitAlert.classList.remove('hidden');
     limitAlert.style.opacity = '1';
     limitAlert.style.transform = 'scale(1) translate(-50%, 0)';
-    
     setTimeout(() => {
         limitAlert.style.opacity = '0';
         limitAlert.style.transform = 'scale(0.95) translate(-50%, 0)';
-        setTimeout(() => {
-            limitAlert.classList.add('hidden');
-        }, 300);
+        setTimeout(() => limitAlert.classList.add('hidden'), 300);
     }, 3000);
-};
-
-// Función para probar las alertas - puedes llamarla desde la consola del navegador
-window.testAlert = () => {
-    showAlert('¡Esto es una alerta de prueba!');
 };
 
 const handleSearchInput = async (e) => {
@@ -80,49 +68,32 @@ const handleSearchInput = async (e) => {
     }
 };
 
-// Mostrar resultados al volver a hacer focus si hay una búsqueda
-cityInput.addEventListener('focus', async (e) => {
-    const query = e.target.value;
-    if (query.length > 2) {
-        const cities = await searchCities(query);
-        renderSearchResults(cities);
-    }
-});
+cityInput.addEventListener('focus', handleSearchInput);
+cityInput.addEventListener('input', debounce(handleSearchInput, 300));
 
-// Añadir manejador para clicks fuera del área de búsqueda
 document.addEventListener('click', (e) => {
     const isClickInside = cityInput.contains(e.target) || resultsContainer.contains(e.target);
-    if (!isClickInside) {
-        resultsContainer.classList.add('hidden');
-    }
+    if (!isClickInside) resultsContainer.classList.add('hidden');
 });
 
 const handleInitialLoad = async () => {
-    // Limpiar el estado inicial
     displayedCities.clear();
     clocksContainer.innerHTML = '';
-    
+
     const savedClockType = localStorage.getItem('clockType');
     const savedPalette = localStorage.getItem('colorPalette') || 'blue';
     const savedTheme = localStorage.getItem('theme') || 'light';
-    const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
+    const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
+        .filter(c => c.lat && c.lon); // ignorar ciudades sin coordenadas
 
-    // Eliminar duplicados del almacenamiento
+    // eliminar duplicados
     const uniqueCities = Array.from(new Set(storedCities.map(JSON.stringify))).map(JSON.parse);
     localStorage.setItem('storedCities', JSON.stringify(uniqueCities));
 
     setColorPalette(savedPalette);
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-    }
+    if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+    updateClockDisplay(savedClockType || 'digital');
 
-    if (savedClockType) {
-        updateClockDisplay(savedClockType);
-    } else {
-        updateClockDisplay('digital');
-    }
-
-    // Recrear los relojes guardados
     for (const cityInfo of uniqueCities) {
         await addClock(cityInfo, displayedCities, true);
     }
@@ -130,69 +101,69 @@ const handleInitialLoad = async () => {
 
 document.addEventListener('DOMContentLoaded', handleInitialLoad);
 
-cityInput.addEventListener('input', debounce(handleSearchInput, 300));
-
 resultsContainer.addEventListener('click', async (e) => {
     const item = e.target.closest('.result-item');
-    if (item && clocksContainer.children.length < MAX_CITIES) {
-        const cityInfo = {
-            name: item.dataset.name,
-            country: item.dataset.country,
-            lat: item.dataset.lat,
-            lon: item.dataset.lon
-        };
-        const added = await addClock(cityInfo, displayedCities);
-        if (added) {
-            cityInput.value = '';
-            resultsContainer.classList.add('hidden');
-        }
-    } else if (item) {
+    if (!item) return;
+
+    if (clocksContainer.children.length >= MAX_CITIES) {
         showAlert('¡Máximo de 8 relojes alcanzado!');
+        resultsContainer.classList.add('hidden');
+        return;
+    }
+
+    const cityInfo = {
+        name: item.dataset.name,
+        country: item.dataset.country,
+        lat: item.dataset.lat,
+        lon: item.dataset.lon
+    };
+    const added = await addClock(cityInfo, displayedCities);
+    if (added) {
+        cityInput.value = '';
         resultsContainer.classList.add('hidden');
     }
 });
 
-
+// Botones de tipo de reloj
 analogBtn.addEventListener('click', () => updateClockDisplay('analog'));
 digitalBtn.addEventListener('click', () => updateClockDisplay('digital'));
 
-document.getElementById('blue-dot').addEventListener('click', () => setColorPalette('blue'));
-document.getElementById('red-dot').addEventListener('click', () => setColorPalette('red'));
-document.getElementById('green-dot').addEventListener('click', () => setColorPalette('green'));
+// Botones de paleta de colores
+['blue', 'red', 'green'].forEach(color =>
+    document.getElementById(`${color}-dot`).addEventListener('click', () => setColorPalette(color))
+);
 
 themeToggleBtn.addEventListener('click', toggleTheme);
 
-
+// Drag & Drop
 let draggedItem = null;
-
-clocksContainer.addEventListener('dragstart', (e) => {
+clocksContainer.addEventListener('dragstart', e => {
     draggedItem = e.target.closest('.clock-card');
-    if (draggedItem) {
-        e.dataTransfer.effectAllowed = 'move';
-        draggedItem.classList.add('dragging');
-    }
+    if (draggedItem) draggedItem.classList.add('dragging');
 });
-
-clocksContainer.addEventListener('dragover', (e) => {
+clocksContainer.addEventListener('dragover', e => {
     e.preventDefault();
     const target = e.target.closest('.clock-card');
     if (target && target !== draggedItem) {
         const rect = target.getBoundingClientRect();
         const y = e.clientY - rect.top;
-        const isBefore = y < rect.height / 2;
-        if (isBefore) {
-            clocksContainer.insertBefore(draggedItem, target);
-        } else {
-            clocksContainer.insertBefore(draggedItem, target.nextSibling);
-        }
+        clocksContainer.insertBefore(draggedItem, y < rect.height / 2 ? target : target.nextSibling);
     }
 });
-
 clocksContainer.addEventListener('dragend', () => {
     if (draggedItem) {
         draggedItem.classList.remove('dragging');
-        const newOrder = Array.from(clocksContainer.children).map(card => card.dataset.timezone);
-        localStorage.setItem('displayedCities', JSON.stringify(newOrder));
+
+        // Reconstruir storedCities usando los objetos completos
+        const newOrder = Array.from(clocksContainer.children).map(card => ({
+            name: card.querySelector('.city-name').textContent,
+            country: card.querySelector('p').textContent,
+            lat: card.dataset.lat,
+            lon: card.dataset.lon
+        }));
+
+        localStorage.setItem('storedCities', JSON.stringify(newOrder));
         draggedItem = null;
     }
 });
+
