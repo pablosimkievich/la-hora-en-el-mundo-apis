@@ -15,7 +15,7 @@ const root = document.documentElement;
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 let clockIntervals = {};
 
-// Paletas de colores
+// Paletas de colores disponibles
 const palettes = {
     blue: ['--blue-darkest', '--blue-darker', '--blue-dark', '--blue-medium', '--blue-light', '--blue-lighter', '--blue-lightest'],
     red: ['--red-darkest', '--red-darker', '--red-dark', '--red-medium', '--red-light', '--red-lighter', '--red-lightest'],
@@ -65,9 +65,9 @@ export const showAlert = (message) => {
     }, 3000);
 };
 
-// Test function - you can call this from the browser console
+// Función para probar las alertas - puedes llamarla desde la consola del navegador
 window.testAlert = () => {
-    showAlert('This is a test alert!');
+    showAlert('¡Esto es una alerta de prueba!');
 };
 
 const handleSearchInput = async (e) => {
@@ -80,14 +80,38 @@ const handleSearchInput = async (e) => {
     }
 };
 
+// Mostrar resultados al volver a hacer focus si hay una búsqueda
+cityInput.addEventListener('focus', async (e) => {
+    const query = e.target.value;
+    if (query.length > 2) {
+        const cities = await searchCities(query);
+        renderSearchResults(cities);
+    }
+});
+
+// Añadir manejador para clicks fuera del área de búsqueda
+document.addEventListener('click', (e) => {
+    const isClickInside = cityInput.contains(e.target) || resultsContainer.contains(e.target);
+    if (!isClickInside) {
+        resultsContainer.classList.add('hidden');
+    }
+});
+
 const handleInitialLoad = async () => {
+    // Limpiar el estado inicial
+    displayedCities.clear();
+    clocksContainer.innerHTML = '';
+    
     const savedClockType = localStorage.getItem('clockType');
     const savedPalette = localStorage.getItem('colorPalette') || 'blue';
     const savedTheme = localStorage.getItem('theme') || 'light';
     const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
 
-    setColorPalette(savedPalette);
+    // Eliminar duplicados del almacenamiento
+    const uniqueCities = Array.from(new Set(storedCities.map(JSON.stringify))).map(JSON.parse);
+    localStorage.setItem('storedCities', JSON.stringify(uniqueCities));
 
+    setColorPalette(savedPalette);
     if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
     }
@@ -99,8 +123,8 @@ const handleInitialLoad = async () => {
     }
 
     // Recrear los relojes guardados
-    for (const cityInfo of storedCities) {
-        await addClock(cityInfo, displayedCities, true); // Añadido parámetro true para indicar carga inicial
+    for (const cityInfo of uniqueCities) {
+        await addClock(cityInfo, displayedCities, true);
     }
 };
 
@@ -124,6 +148,7 @@ resultsContainer.addEventListener('click', async (e) => {
         }
     } else if (item) {
         showAlert('¡Máximo de 8 relojes alcanzado!');
+        resultsContainer.classList.add('hidden');
     }
 });
 

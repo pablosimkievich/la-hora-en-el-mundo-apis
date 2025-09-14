@@ -5,7 +5,7 @@ export const searchCities = async (query) => {
     try {
         const response = await fetch(`${NOMINATIM_URL}?q=${query}&format=json&addressdetails=1`);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`¡Error HTTP! estado: ${response.status}`);
         }
         const data = await response.json();
         return data.map(item => ({
@@ -15,7 +15,7 @@ export const searchCities = async (query) => {
             lon: item.lon
         }));
     } catch (error) {
-        console.error('Error fetching cities:', error);
+        console.error('Error al buscar ciudades:', error);
         return [];
     }
 };
@@ -26,12 +26,12 @@ export const getTimezone = async (lat, lon) => {
     try {
         const response = await fetch(OPENMETEO_URL);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`¡Error HTTP! estado: ${response.status}`);
         }
         const data = await response.json();
         return data.timezone;
     } catch (error) {
-        console.error('Error fetching timezone:', error);
+        console.error('Error al obtener zona horaria:', error);
         return null;
     }
 };

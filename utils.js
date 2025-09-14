@@ -1,4 +1,4 @@
-// utils.js
+// Funciones de utilidad
 export const debounce = (func, delay) => {
     let timeoutId;
     return (...args) => {

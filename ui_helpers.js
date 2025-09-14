@@ -1,4 +1,4 @@
-// ui_helpers.js
+// Funciones auxiliares de interfaz de usuario
 import { getTimezone } from "./api_services.js";
 import { showAlert } from "./main.js";
 
@@ -11,47 +11,54 @@ export const updateClockDisplay = (type) => {
     const analogBtn = document.getElementById('analog-btn');
     const digitalBtn = document.getElementById('digital-btn');
 
+    // Reiniciar ambos botones y activar el correcto
+    analogBtn.classList.remove('active');
+    digitalBtn.classList.remove('active');
+    if (type === 'digital') {
+        digitalBtn.classList.add('active');
+    } else {
+        analogBtn.classList.add('active');
+    }
+
     document.querySelectorAll('.clock-display').forEach(display => {
         if (type === 'digital') {
             display.classList.add('digital-view');
             display.classList.remove('analog-view');
-            digitalBtn.classList.add('active');
-            analogBtn.classList.remove('active');
         } else {
             display.classList.add('analog-view');
             display.classList.remove('digital-view');
-            analogBtn.classList.add('active');
-            digitalBtn.classList.remove('active');
         }
     });
 };
 
 export const addClock = async (cityInfo, displayedCities, isInitialLoad = false) => {
-    // Check max cities first
+    // Verificar primero el máximo de ciudades
     if (clocksContainer.children.length >= MAX_CITIES) {
-        showAlert('¡Máximo de 8 relojes alcanzado!');
+        if (!isInitialLoad) {
+            showAlert('¡Máximo de 8 relojes alcanzado!');
+            resultsContainer.classList.add('hidden');
+        }
         return false;
     }
 
     const timeZone = await getTimezone(cityInfo.lat, cityInfo.lon);
     if (!timeZone) {
-        console.error('Could not get timezone for the city.');
+        console.error('No se pudo obtener la zona horaria para esta ciudad');
         return false;
     }
+
+    // Evitar duplicados usando el nombre de la ciudad
+    const normalizedCityName = cityInfo.name.toLowerCase().trim();
+    const existingCities = Array.from(clocksContainer.querySelectorAll('.city-name'))
+        .map(el => el.textContent.toLowerCase().trim());
     
-    // Evita duplicados solo cuando no es carga inicial
-    if (!isInitialLoad) {
-        const normalizedCityName = cityInfo.name.toLowerCase().trim();
-        const existingCities = Array.from(clocksContainer.querySelectorAll('.city-name'))
-            .map(el => el.textContent.toLowerCase().trim());
-        
-        if (existingCities.includes(normalizedCityName)) {
-            showAlert('¡Esta ciudad ya está agregada!');
-            return false;
-        }
+    if (!isInitialLoad && existingCities.includes(normalizedCityName)) {
+        showAlert('¡Esta ciudad ya está agregada!');
+        resultsContainer.classList.add('hidden');
+        return false;
     }
 
-    // Create clock card
+    // Crear tarjeta del reloj
     const card = document.createElement('div');
     card.classList.add('clock-card', 'rounded-xl', 'p-6', 'flex', 'flex-col', 'items-center', 'cursor-move');
     card.setAttribute('draggable', 'true');
@@ -114,11 +121,14 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
     clockIntervals[timeZone] = setInterval(timeUpdater, 1000);
     localStorage.setItem('clockIntervals', JSON.stringify(clockIntervals));
 
-    // Guardar la información de la ciudad también para recrear el card
-    const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
-    storedCities.push(cityInfo);
-    localStorage.setItem('storedCities', JSON.stringify(storedCities));
-
+    // Actualizar el almacenamiento local solo si no es carga inicial
+    if (!isInitialLoad) {
+        const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
+        if (!storedCities.some(city => city.name.toLowerCase().trim() === normalizedCityName)) {
+            storedCities.push(cityInfo);
+            localStorage.setItem('storedCities', JSON.stringify(storedCities));
+        }
+    }
 
     card.querySelector('.remove-btn').addEventListener('click', (e) => {
         const cityToRemove = e.currentTarget.dataset.city;
@@ -131,16 +141,16 @@ export const addClock = async (cityInfo, displayedCities, isInitialLoad = false)
             delete storedIntervals[cityToRemove];
             localStorage.setItem('clockIntervals', JSON.stringify(storedIntervals));
 
-            // Eliminar la ciudad del array guardado en localStorage
+            // Eliminar la ciudad del almacenamiento local
             const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
                 .filter(city => city.name !== cityName);
             localStorage.setItem('storedCities', JSON.stringify(storedCities));
 
-            // Eliminar la ciudad del Set y actualizar localStorage
+            // Eliminar la ciudad del Set y actualizar el almacenamiento
             displayedCities.delete(cityToRemove);
             localStorage.setItem('displayedCities', JSON.stringify(Array.from(displayedCities)));
 
-            // Eliminar el card del DOM
+            // Eliminar la tarjeta del DOM
             cardToRemove.remove();
         }
     });

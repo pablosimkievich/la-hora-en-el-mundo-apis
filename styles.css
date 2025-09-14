@@ -95,10 +95,12 @@ body {
 }
 
 #theme-toggle-btn {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     padding: 0;
     background-color: black;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 :root.dark #theme-toggle-btn {
@@ -357,7 +359,8 @@ body {
 }
 
 #results-container .result-item:hover {
-    background-color: var(--primary-lighter);
+    background-color: var(--text-input);
+    color: var(--bg-input);
 }
 
 /* Estilos para el input de búsqueda */
@@ -376,6 +379,12 @@ body {
     background-color: var(--bg-input);
     color: var(--text-input);
     border-color: var(--primary-light);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer y Edge */
+}
+
+#results-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari y Opera */
 }
 
 .dark #results-container {
