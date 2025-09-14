@@ -87,36 +87,45 @@ const handleInitialLoad = async () => {
         .filter(c => c.lat && c.lon);
 
     // eliminar duplicados
+    console.log('storedCities antes de guardar:', storedCities);
+
     const uniqueCities = Array.from(new Set(storedCities.map(JSON.stringify))).map(JSON.parse);
     localStorage.setItem('storedCities', JSON.stringify(uniqueCities));
 
     setColorPalette(savedPalette);
     if (savedTheme === 'dark') document.documentElement.classList.add('dark');
     updateClockDisplay(savedClockType || 'digital');
+if (uniqueCities.length === 0 && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async position => {
+        const { latitude, longitude } = position.coords;
 
-    if (uniqueCities.length === 0 && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async position => {
-            const { latitude, longitude } = position.coords;
+        const cities = await searchCities(`${latitude},${longitude}`);
+        if (cities && cities.length > 0) {
+            const cityInfo = {
+                name: cities[0].name,
+                country: cities[0].country,
+                lat: latitude,
+                lon: longitude
+            };
 
-            // Usar tu función de búsqueda de ciudad a partir de lat/lon
-            const cities = await searchCities(`${latitude},${longitude}`);
-            if (cities && cities.length > 0) {
-                const cityInfo = {
-                    name: cities[0].name,
-                    country: cities[0].country,
-                    lat: latitude,
-                    lon: longitude
-                };
-                await addClock(cityInfo, displayedCities, true);
-            }
-        }, () => {
-            console.warn('No se pudo obtener ubicación del navegador.');
-        });
-    } else {
-        for (const cityInfo of uniqueCities) {
+            // Añadir la ciudad local a storedCities
+            storedCities.push(cityInfo);
+
+            // Eliminar duplicados y guardar
+            const uniqueCitiesUpdated = Array.from(new Set(storedCities.map(JSON.stringify))).map(JSON.parse);
+            localStorage.setItem('storedCities', JSON.stringify(uniqueCitiesUpdated));
+
             await addClock(cityInfo, displayedCities, true);
         }
+    }, () => {
+        console.warn('No se pudo obtener ubicación del navegador.');
+    });
+} else {
+    for (const cityInfo of uniqueCities) {
+        await addClock(cityInfo, displayedCities, true);
     }
+}
+
 };
 
 
