@@ -87,9 +87,10 @@ body {
 
 /*
 html::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari y Opera 
+    display: none;   
 }
 */
+
 
 .header {
     background-color: var(--bg-header-footer);
