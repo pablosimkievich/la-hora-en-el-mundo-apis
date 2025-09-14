@@ -84,7 +84,7 @@ const handleInitialLoad = async () => {
     const savedPalette = localStorage.getItem('colorPalette') || 'blue';
     const savedTheme = localStorage.getItem('theme') || 'light';
     const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]')
-        .filter(c => c.lat && c.lon); // ignorar ciudades sin coordenadas
+        .filter(c => c.lat && c.lon);
 
     // eliminar duplicados
     const uniqueCities = Array.from(new Set(storedCities.map(JSON.stringify))).map(JSON.parse);
@@ -94,10 +94,32 @@ const handleInitialLoad = async () => {
     if (savedTheme === 'dark') document.documentElement.classList.add('dark');
     updateClockDisplay(savedClockType || 'digital');
 
-    for (const cityInfo of uniqueCities) {
-        await addClock(cityInfo, displayedCities, true);
+    if (uniqueCities.length === 0 && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async position => {
+            const { latitude, longitude } = position.coords;
+
+            // Usar tu función de búsqueda de ciudad a partir de lat/lon
+            const cities = await searchCities(`${latitude},${longitude}`);
+            if (cities && cities.length > 0) {
+                const cityInfo = {
+                    name: cities[0].name,
+                    country: cities[0].country,
+                    lat: latitude,
+                    lon: longitude
+                };
+                await addClock(cityInfo, displayedCities, true);
+            }
+        }, () => {
+            console.warn('No se pudo obtener ubicación del navegador.');
+        });
+    } else {
+        for (const cityInfo of uniqueCities) {
+            await addClock(cityInfo, displayedCities, true);
+        }
     }
 };
+
+
 
 document.addEventListener('DOMContentLoaded', handleInitialLoad);
 
