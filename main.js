@@ -154,16 +154,22 @@ clocksContainer.addEventListener('dragend', () => {
     if (draggedItem) {
         draggedItem.classList.remove('dragging');
 
-        // Reconstruir storedCities usando los objetos completos
-        const newOrder = Array.from(clocksContainer.children).map(card => ({
-            name: card.querySelector('.city-name').textContent,
-            country: card.querySelector('p').textContent,
-            lat: card.dataset.lat,
-            lon: card.dataset.lon
-        }));
+        const storedCities = JSON.parse(localStorage.getItem('storedCities') || '[]');
+
+        const newOrder = Array.from(clocksContainer.children).map(card => {
+            // Tomar solo el nombre hasta la coma
+            const cardCityName = card.querySelector('.city-name').textContent.split(',')[0].trim();
+            const cardCountry = card.querySelector('p').textContent.trim();
+
+            return storedCities.find(city => 
+                city.name.split(',')[0].trim() === cardCityName &&
+                city.country === cardCountry
+            );
+        }).filter(Boolean);
 
         localStorage.setItem('storedCities', JSON.stringify(newOrder));
         draggedItem = null;
     }
 });
+
 
