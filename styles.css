@@ -115,7 +115,7 @@ html::-webkit-scrollbar {
 }
 
 .btn-toggle {
-    background-color: var(--primary-lightest);
+    background-color: var(--primary-light);
     color: var(--primary-darkest);
     border-radius: 4px;
     padding: 0.5rem 1rem;
